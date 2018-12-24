@@ -1,5 +1,5 @@
 # coexistence-via-chemical-interactions
-modeling microbial coexistence when interactions are chemical-mediated (codes written in Matlab)
+Modeling microbial coexistence when interactions are chemical-mediated (codes written in Matlab)
 
 Modeling the process of community assembly when microbial interactions are mediated by chemical compounds that can be added (by release or conversion) or removed (by consumption or degradation) from the environment by species
 
