@@ -1,4 +1,4 @@
-function [Ne, Cmp] = WellmixedInteraction_DpMM_ExMT4(nRound,r0Vector,cellRatioArray,intMat,nInitialCell,kSatVector,A,B,kSatLevel,ExtTh,DilTh,tauf,dtau)
+function [taurng,Species,Chemicals] = Dynamics_WM_DpMM(nRound,r0,cellRatioArray,intMat,nInitialCell,kSatVector,A,B,kSatLevel,ExtTh,DilTh,tauf,dtau)
 
 %% Well-mixed model for growth of interacting species
 % UIC: Uniform initial condition
@@ -11,6 +11,8 @@ function [Ne, Cmp] = WellmixedInteraction_DpMM_ExMT4(nRound,r0Vector,cellRatioAr
 % nMediator = 6; % # of mediators
 % nRound = 15; % number of rounds of propagation
 % r0 = 0.08+0.04*rand(Nc,1); % population reproduction rates, per hour
+% cellRatioArray = 1/nCellType*ones(1,nCellType);
+% kSatVector = 1e4*ones(nMediator,1) % mediator response saturation levels 
 % nInitialCell = 1e4; % total initial cells
 % kSatLevel = 1e7; % interaction strength saturation level of each population
 % ExtTh = 0.1; % population extinction threshold
@@ -56,7 +58,7 @@ Cc = zeros(nMediator,nRound*nTauScale);
 cct = 0;
 nCellVector = nInitialCell * cellRatioArray'; % initial number of each cell type
 
-for iRound = 1 : nRound,
+for iRound = 1 : nRound
     cMedVector = nInitialCell / sum(nCellVector) * cMedVector;
     nCellVector = nInitialCell * cellRatioArray'; % initial number of each cell type
     
@@ -67,12 +69,12 @@ for iRound = 1 : nRound,
     cMedOnEachScale = zeros(nMediator,nTauScale);
     rzm = zeros(nCellType,nTauScale);
     count = 0;
-    while (tau<=tauf-dtau) && (sum(nCellOnEachScale(:,max(count,1)))<DilTh),
+    while (tau<=tauf-dtau) && (sum(nCellOnEachScale(:,max(count,1)))<DilTh)
         
         count = count+1;
         tau = tauScaleArray(count);
             
-        rIntPerCellVector = r0Vector + ((intMat < 0) .* intMat) * (cMedVector ./ kSatVector) + ((intMat >= 0).* intMat) * (cMedVector ./ (cMedVector + kSatVector));
+        rIntPerCellVector = r0 + ((intMat < 0) .* intMat) * (cMedVector ./ kSatVector) + ((intMat >= 0).* intMat) * (cMedVector ./ (cMedVector + kSatVector));
                     
         nCellVector = nCellVector + dtau * (rIntPerCellVector .* nCellVector);
         nCellVector(nCellVector < ExtTh) = 0;
@@ -89,7 +91,7 @@ for iRound = 1 : nRound,
     end
     cellRatioArray = 1/sum(nCellOnEachScale(:,count))*nCellOnEachScale(:,count)';
     
-    if cct ==0,
+    if cct ==0
         tc(cct+1:cct+count) = tauScaleArray(1:count);
     else
         tc(cct+1:cct+count) = tc(cct) + tauScaleArray(1:count);
@@ -99,23 +101,9 @@ for iRound = 1 : nRound,
     cct = cct+count;
 
 end
-r = nCellOnEachScale(:,count)./nCellOnEachScale(:,1);
-stp = (r > abs(0.9*max(r)));
-indx = 1:nCellType;
-Ne = indx(stp);
-Cmp = cellRatioArray(Ne);
 
-% get Cmp as percentage each cell type contributes to the total community
-if sum(Cmp) > 0,
-    Cmp_sum = zeros(1,size(Cmp,2));
-    Cmp_sum(1,:) = sum(Cmp);
-
-    Cmp = Cmp./Cmp_sum;
-end
-
-% figure
-% semilogy(Xlm)
-% hold on
-% semilogy(Xlm(Ne,:)','o')
+taurng = dtau*(1:cct);
+Species = Xc(:,1:cct);
+Chemicals = Cc(:,1:cct);
 
 return;
