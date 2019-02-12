@@ -2,9 +2,13 @@
 Modeling microbial coexistence when interactions are chemical-mediated 
 
 Codes are m-files, written in Matlab
+
 Matlab is required to run the codes
+
 Tested in Matlab R2018b (9.5.0.944444) 64-bit (win64)
+
 The accompanied .mat file is an example of simulation results, which can be used to produce plots similar to the figures in the manuscript
+
 
 Modeling the process of community assembly when microbial interactions are mediated by chemical compounds that can be added (by release or conversion) or removed (by consumption or degradation) from the environment by species
 
